@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Question Answering</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #e0f7fa;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .top-bar {
+            width: 100%;
+            background-color: #006064;
+            color: #ffffff;
+            padding: 15px 0;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            margin: 60px auto;
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+        }
+        h1 {
+            margin: 0 0 20px 0;
+            color: #00796b;
+        }
+        .description {
+            margin: 20px 0;
+            font-size: 1.1em;
+            color: #555;
+        }
+        form, .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        input[type="file"], input[type="text"], button {
+            margin-bottom: 15px;
+            padding: 10px;
+            width: 80%;
+            border: 1px solid #b0bec5;
+            border-radius: 4px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+        input[type="file"]:focus, input[type="text"]:focus, button:focus {
+            outline: none;
+            border-color: #4fc3f7;
+        }
+        button {
+            background-color: #00796b;
+            color: #ffffff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #004d40;
+        }
+        #voice-input, #translate-button {
+            width: 80%;
+            background-color: #0097a7;
+            color: #ffffff;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 1em;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+        #voice-input:hover, #translate-button:hover {
+            background-color: #006064;
+        }
+        #answer, #translated-answer {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #b0bec5;
+            border-radius: 4px;
+            font-size: 1em;
+            background-color: #f1f8e9;
+            color: #333;
+            width: 80%;
+            position: relative;
+        }
+        #language-select {
+            margin-top: 10px;
+            padding: 10px;
+            width: 80%;
+            border: 1px solid #b0bec5;
+            border-radius: 4px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+        #language-select:focus {
+            outline: none;
+            border-color: #4fc3f7;
+        }
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #555;
+        }
+        .info-section {
+            background-color: #f0f4c3;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            margin: 20px auto;
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+        }
+        .info-section h2 {
+            margin-top: 0;
+            color: #00796b;
+        }
+        .info-section p {
+            font-size: 1em;
+            color: #555;
+            line-height: 1.6em;
+        }
+        .control-icons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        .control-icons span {
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar">PDF Question Answering</div>
+    <div class="container">
+        <h1>Ask Your PDF</h1>
+        <p class="description">Ever had a question about a document but couldn't find the answer? Upload your PDF and ask away! Get instant answers and translations at the click of a button.</p>
+        <form id="question-form" method="POST" enctype="multipart/form-data">
+            <input type="file" name="pdf" accept=".pdf" required><br>
+            <input type="text" id="question-input" name="question" placeholder="Enter your question" required><br>
+            <button type="submit">Ask</button>
+        </form>
+        <div class="controls">
+            <button id="voice-input">Ask with Voice</button>
+            <div id="answer"></div>
+            <div class="control-icons">
+                <span id="copy-answer" title="Copy Answer">📋</span>
+                <span id="download-answer" title="Download Answer">💾</span>
+            </div>
+            <button id="translate-button">Translate</button>
+            <select id="language-select">
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <option value="zh">Chinese</option>
+                <option value="hi">Hindi</option>
+                <option value="mr">Marathi</option>
+                <!-- Add more languages as needed -->
+            </select>
+            <div id="translated-answer"></div>
+            <div class="control-icons">
+                <span id="copy-translated-answer" title="Copy Translated Answer">📋</span>
+                <span id="download-translated-answer" title="Download Translated Answer">💾</span>
+            </div>
+        </div>
+    </div>
+    <div class="info-section">
+        <h2>About Large Language Models (LLMs)</h2>
+        <p>
+            Large Language Models (LLMs) are advanced AI systems that can understand and generate human-like text. They are trained on vast amounts of data and can perform a variety of tasks, including answering questions, translating languages, summarizing text, and more.
+        </p>
+        <p>
+            These models are based on deep learning techniques and use complex neural networks to analyze and produce text. LLMs are continually improving and becoming more sophisticated, enabling them to assist in a wide range of applications from customer service to content creation.
+        </p>
+        <p>
+            At the heart of LLMs is their ability to comprehend context and generate relevant responses, making them invaluable tools in today's digital landscape. Whether you're looking to understand a document, communicate in a different language, or get quick answers to your queries, LLMs are here to help.
+        </p>
+    </div>
+    <div class="footer">Created by: Apoorva, Shruti, Varadraj, Pratham</div>
+
+    <script>
+        document.getElementById('question-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            fetch('/ask', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('answer').innerText = 'Error: ' + data.error + (data.details ? ' (' + data.details + ')' : '');
+                } else {
+                    document.getElementById('answer').innerText = data.answer;
+                    textToSpeech(data.answer);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        document.getElementById('voice-input').addEventListener('click', function () {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'en-US';
+
+            recognition.onresult = function (event) {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('question-input').value = transcript;
+                document.getElementById('question-form').dispatchEvent(new Event('submit'));
+            };
+
+            recognition.onerror = function (event) {
+                console.error('Speech recognition error:', event.error);
+            };
+
+            recognition.start();
+        });
+
+        document.getElementById('translate-button').addEventListener('click', function () {
+            const text = document.getElementById('answer').innerText;
+            const language = document.getElementById('language-select').value;
+
+            fetch('/translate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text: text, language: language })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('translated-answer').innerText = 'Error: ' + data.error + (data.details ? ' (' + data.details + ')' : '');
+                } else {
+                    document.getElementById('translated-answer').innerText = data.translated_text;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        function textToSpeech(text) {
+            fetch('/tts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text: text })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('TTS Error:', data.error, data.details);
+                } else {
+                    const audio = new Audio('data:audio/mp3;base64,' + data.audio);
+                    audio.play();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        document.getElementById('copy-answer').addEventListener('click', function () {
+            const answerText = document.getElementById('answer').innerText;
+            navigator.clipboard.writeText(answerText).then(() => {
+                alert('Answer copied to clipboard');
+            });
+        });
+
+        document.getElementById('download-answer').addEventListener('click', function () {
+            const answerText = document.getElementById('answer').innerText;
+            fetch('/download', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text: answerText })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const file_base64 = data.file;
+                const a = document.createElement('a');
+                a.href = 'data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,' + file_base64;
+                a.download = 'answer.docx';
+                a.click();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        document.getElementById('copy-translated-answer').addEventListener('click', function () {
+            const translatedText = document.getElementById('translated-answer').innerText;
+            navigator.clipboard.writeText(translatedText).then(() => {
+                alert('Translated answer copied to clipboard');
+            });
+        });
+
+        document.getElementById('download-translated-answer').addEventListener('click', function () {
+            const translatedText = document.getElementById('translated-answer').innerText;
+            fetch('/download', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text: translatedText })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const file_base64 = data.file;
+                const a = document.createElement('a');
+                a.href = 'data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,' + file_base64;
+                a.download = 'translated_answer.docx';
+                a.click();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
